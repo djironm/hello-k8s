@@ -25,4 +25,24 @@ jobs:
 
       - name: Run tests
         run: npm test
-        
+      - name: Build container image
+        run: docker build -t hello-k8s:${{ github.sha }} .
+      - name: Smoke-test container
+        run: |
+          docker run -d \
+            --name hello-k8s-ci \
+            -p 3000:3000 \
+            hello-k8s:${{ github.sha }}
+
+          for attempt in {1..10}; do
+            if curl --fail --silent http://127.0.0.1:3000/health; then
+              exit 0
+            fi
+              sleep 1
+          done
+
+          docker logs hello-k8s-ci
+          exit 1  
+      - name: Clean up container
+        if: always()
+        run: docker rm -f hello-k8s-ci || true
