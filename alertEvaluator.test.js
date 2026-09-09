@@ -9,7 +9,7 @@ test('alerts when CPU exceeds threshold', () => {
 
     const result = evaluateAlert(cpuUsage, threshold);
 
-    assert(result === false);
+    assert(result === true);
 });
 
 test('does not alert when CPU below threshold', () => {
